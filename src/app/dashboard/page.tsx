@@ -1,36 +1,23 @@
-import { MessageState } from "../features/dashboard/MessageState";
-import { TitleBar } from "../features/dashboard/TitleBar";
+import { BookingList } from "@/components/ui/bookings/BookingList";
+import { bookings } from '../../db/schema';
+import { getBookingsByDate } from "./_actions/get-bookings";
 
+const DashboardIndexPage = async () => {
 
-
-
-const DashboardIndexPage = () => {
-
+  const bookings = await getBookingsByDate()
 
   return (
-    <>
-      <TitleBar
-        title={'title_bar'}
-        description={'title_bar_description'}
-      />
-
-      <MessageState
-        icon={(
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 24 24"
-            fill="none"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <path d="M0 0h24v24H0z" stroke="none" />
-            <path d="M12 3l8 4.5v9L12 21l-8-4.5v-9L12 3M12 12l8-4.5M12 12v9M12 12L4 7.5" />
-          </svg>
-        )}
-        title={'message_state_title'}
-        description={""} button={undefined}        
-      />
-    </>
+    <div className="container mx-auto py-10">
+          <div className="space-y-6">
+            <div>
+              <h1 className="text-2xl font-bold">Dashboard</h1>
+              <p className="text-muted-foreground">
+                Check your next appointments
+              </p>
+            </div>
+            <BookingList bookings={bookings} />
+          </div>
+        </div>
   );
 };
 

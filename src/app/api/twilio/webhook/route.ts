@@ -6,8 +6,6 @@ import Twilio from 'twilio';
 const accountSid = process.env.TWILIO_ACCOUNT_SID!;
 const authToken = process.env.TWILIO_AUTH_TOKEN!;
 const client = Twilio(accountSid, authToken);
-console.log(accountSid)
-console.log(authToken)
 
 export async function POST(req: NextRequest) {
     const formData = await req.formData();
