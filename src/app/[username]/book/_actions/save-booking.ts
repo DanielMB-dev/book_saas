@@ -6,7 +6,7 @@ import { saveCalendarEvent } from "@/lib/google";
 import { BookingDataDB } from "@/types/booking";
 import { eq } from 'drizzle-orm';
 
-export async function saveBooking(bookingValues: any) {
+export async function saveBookingDB(bookingValues: any) {
     try {
         await db.insert(bookings).values(bookingValues)
 
@@ -40,10 +40,11 @@ export async function saveBookingGoogle(
     }) {
 
     try {
-        await saveCalendarEvent(userId, calendarId, eventDetails)
-        return { success: true }
+        const event = await saveCalendarEvent(userId, calendarId, eventDetails)
+
+        return { success: true, eventGoogleId: event.id }
     } catch (error) {
-        return { success: false }
+        return { success: false, eventGoogleId: null }
     }
 
 }

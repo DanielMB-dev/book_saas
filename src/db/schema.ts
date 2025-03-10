@@ -2,6 +2,7 @@ import { pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core"
 
 export const bookings = pgTable("bookings", {
   id: uuid("id").defaultRandom().primaryKey(),
+  eventGoogleId: text("event_google_id"),
   userId: text("user_id").notNull(),
   guestName: text("guest_name").notNull(),
   guestEmail: text("guest_email").notNull(),

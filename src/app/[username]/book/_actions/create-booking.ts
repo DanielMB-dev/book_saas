@@ -3,9 +3,9 @@
 import { generateICS } from "@/lib/ics"
 import { BookingDataDB } from "@/types/booking"
 import { getUser } from "./user";
-import { saveBooking, saveBookingGoogle } from "./save-booking";
+import { saveBookingDB, saveBookingGoogle } from "./save-booking";
 import { getCalendarId } from "./calendar-selection";
-import { sendEmailMessage} from "@/lib/email";
+import { sendEmailMessage } from "@/lib/email";
 
 
 
@@ -50,18 +50,21 @@ export async function createBooking({
       endTime: new Date(time.getTime() + 30 * 60 * 1000),
     }
 
-    const bookingSaved = await saveBooking(booking)
+    // const bookingSaved = await saveBookingDB(booking)
     const calendarId = await getCalendarId(booking.userId!)
 
-    if (bookingSaved.success) {
-      const googleSaved = await saveBookingGoogle(booking.userId!, calendarId[0].calendarId, {
-        summary: booking.notes!,
-        description: booking.guestName,
-        start: booking.startTime,
-        end: booking.endTime,
-        attendeesEmails: [booking.guestEmail]
-      })
-      if (googleSaved.success) {
+    const googleSaved = await saveBookingGoogle(booking.userId!, calendarId[0].calendarId, {
+      summary: booking.notes!,
+      description: booking.guestName,
+      start: booking.startTime,
+      end: booking.endTime,
+      attendeesEmails: [booking.guestEmail]
+    })
+
+    if (googleSaved.success) {
+      booking.eventGoogleId = googleSaved.eventGoogleId
+      const bookingSaved = await saveBookingDB(booking)
+      if (bookingSaved.success) {
         sendEmailMessage(booking, eventContent)
         return {
           success: true
@@ -70,6 +73,7 @@ export async function createBooking({
       return {
         success: false
       }
+
     }
     return {
       success: false

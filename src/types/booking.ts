@@ -1,13 +1,14 @@
 import { uuid } from 'drizzle-orm/pg-core';
 export interface BookingDataDB {
-    id: string
+    id?: string
     guestName: string
     guestEmail: string
     notes?: string
     startTime: Date
     endTime: Date
     userId: string | null
-    createdAt: Date
+    eventGoogleId?: string
+    createdAt?: Date
 }
 
 export interface GroupedBookings {

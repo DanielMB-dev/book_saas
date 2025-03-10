@@ -9,7 +9,6 @@ import { QueryResult } from "pg"
 
 
 const parseBookingData = (groupedBookings: QueryResult<Record<string, unknown>>) => {
-    
     const result: GroupedBookings = {
         bookings: groupedBookings.rows.map(row => ({
             reservation_date: String(row.reservation_date), // Convertir a string
@@ -21,7 +20,8 @@ const parseBookingData = (groupedBookings: QueryResult<Record<string, unknown>>)
                 startTime: new Date(res.startTime),
                 endTime: new Date(res.endTime),
                 createdAt: new Date(res.createdAt),
-                userId: String(res.userId)
+                userId: String(res.userId),
+                eventGoogleId: String(res.eventGoogleId)
             }))
         }))
     };
@@ -46,7 +46,9 @@ export const getBookingsByDate = async () : Promise <GroupedBookings> => {
         'notes', notes,
         'startTime', start_time,
         'endTime', end_time,
-        'createdAt', created_at
+        'createdAt', created_at,
+        'userId', user_id,
+        'eventGoogleId', event_google_id
       )) AS reservations
     FROM ${bookings}
     WHERE user_id = ${userId}

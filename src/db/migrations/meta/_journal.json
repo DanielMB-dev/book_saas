@@ -8,6 +8,20 @@
       "when": 1740312323358,
       "tag": "0000_noisy_weapon_omega",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1741613351984,
+      "tag": "0001_lively_scrambler",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1741613549136,
+      "tag": "0002_pretty_santa_claus",
+      "breakpoints": true
     }
   ]
 }

@@ -1,0 +1,1 @@
+ALTER TABLE "bookings" RENAME COLUMN "eventGoogleId" TO "event_google_id";

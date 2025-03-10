@@ -5,6 +5,7 @@ import { getBookingsByDate } from "./_actions/get-bookings";
 const DashboardIndexPage = async () => {
 
   const bookings = await getBookingsByDate()
+  console.log(bookings.bookings[0].reservations)
 
   return (
     <div className="container mx-auto py-10">
