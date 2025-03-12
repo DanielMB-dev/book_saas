@@ -6,7 +6,7 @@ export function convertToLocalTime( datetime: string , timezone: string) {
     const userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
     // Convertir la fecha a la zona horaria local del usuario
-    const localDate = new Date(date.toLocaleString('en-US', { timeZone: userTimeZone }));
+    const localDate = new Date(date.toLocaleString('en-US', { timeZone: timezone }));
 
     return localDate;
 }
