@@ -43,6 +43,7 @@ export default function CalendarDayPicker({ username }: CalendarDayPickerProps) 
       
       const response = await fetch(`/api/availability?${searchParams.toString()}`)
       const data = await response.json()
+
       
       setMonthAvailability(data.days || [])
     } catch (error) {
@@ -84,6 +85,7 @@ export default function CalendarDayPicker({ username }: CalendarDayPickerProps) 
   }
 
   // Find the availability for the selected date
+console.log({date})
   const selectedDateAvailability = date
     ? monthAvailability.find(day => day.date === format(date, "yyyy-MM-dd"))
     : undefined

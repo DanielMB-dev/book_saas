@@ -1,12 +1,13 @@
-export const formatLocalDate = (dateUTC: Date) => {
-
+export function convertToLocalTime( datetime: string , timezone: string) {
+    // Crear un objeto Date usando la fecha y la zona horaria proporcionada
+    const date = new Date(datetime);
+    console.log(datetime)
+    // Obtener la zona horaria del usuario
     const userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
-    // Convertir a la zona horaria del usuario
-    const localDate = new Date(
-        new Date(dateUTC).toLocaleString("en-US", { timeZone: 'UTC-3' })
-    );
+    // Convertir la fecha a la zona horaria local del usuario
+    const localDate = new Date(date.toLocaleString('en-US', { timeZone: userTimeZone }));
 
-    return localDate
-
+    return localDate;
 }
+

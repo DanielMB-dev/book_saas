@@ -15,11 +15,13 @@ interface TimePickerProps {
 }
 
 export function TimePicker({ date, slots, onTimeSelect }: TimePickerProps) {
+
   const [selectedTime, setSelectedTime] = React.useState<Date | null>(null)
 
   const handleTimeSelect = (slot: { time: string; available: boolean }) => {
     if (!slot.available) return
     const time = parse(`${format(date, "yyyy-MM-dd")} ${slot.time}`, "yyyy-MM-dd HH:mm", new Date())
+    console.log(time)
     setSelectedTime(time)
     onTimeSelect?.(time)
   }

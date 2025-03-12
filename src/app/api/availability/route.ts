@@ -16,7 +16,8 @@ import {
   isSameMonth
 } from "date-fns"
 import { getCalendarEvents } from "@/lib/google"
-import { formatLocalDate } from "@/helpers/formatDateToLocal"
+import { convertToLocalTime } from "@/helpers/formatDateToLocal"
+
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
@@ -94,14 +95,17 @@ export async function GET(request: Request) {
 
       // Check if this slot overlaps with any calendar events
       const isAvailable = !events.some((event) => {
-        console.log({ event })
-        const eventStart = event.start.dateTime
-        const eventEnd = event.end.dateTime
-        /* const eventStartIso = parseISO(event.start.dateTime || event.start.date)
-        const eventEndIso = parseISO(event.end.dateTime || event.end.date)
-        const eventStart = formatLocalDate(eventStartIso)
+       // console.log({ event })
+       /*  const eventStart = event.start.dateTime
+        const eventEnd = event.end.dateTime */
+     /*    const eventStartISO = parseISO(event.start.dateTime || event.start.date)
+        const eventEndISO = parseISO(event.end.dateTime || event.end.date) */
+        /* const eventStart = formatLocalDate(eventStartIso)
         const eventEnd = formatLocalDate(eventEndIso) */
-        console.log({eventStart})
+ 
+        const eventStart = convertToLocalTime(event.start.dateTime, event.start.timezone)
+        const eventEnd =  convertToLocalTime(event.end.dateTime, event.end.timezone)
+        console.log({ eventStart })
         if (!isSameMonth(eventStart, monthDate)) return false
 
         return (
