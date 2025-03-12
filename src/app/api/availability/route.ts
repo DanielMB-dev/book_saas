@@ -103,7 +103,7 @@ export async function GET(request: Request) {
       );
 
       // Verificar disponibilidad
-      const isAvailable = !events.some((event) => {
+     /*  const isAvailable = !events.some((event) => {
         const eventStart = new Date(event.start.dateTime);
         const eventEnd = new Date(event.end.dateTime);
 
@@ -113,8 +113,35 @@ export async function GET(request: Request) {
           isWithinInterval(eventStart, { start: slotStartISO, end: slotEndISO })
         );
       });
-
+ */
       // Agregar el slot con la hora explícitamente en formato de Chile
+
+      // Verificar disponibilidad con lógica más precisa
+      const isAvailable = !events.some((event) => {
+        const eventStart = new Date(event.start.dateTime);
+        const eventEnd = new Date(event.end.dateTime);
+
+        // Un slot está ocupado solo si el evento cubre completamente el slot o
+        // si el evento comienza exactamente al inicio del slot
+
+        // Comprueba si el evento comienza exactamente en este slot
+        const eventStartsInSlot =
+          eventStart >= slotStartISO &&
+          eventStart < slotEndISO;
+
+        // Comprueba si el evento termina dentro de este slot
+        const eventEndsInSlot =
+          eventEnd > slotStartISO &&
+          eventEnd <= slotEndISO;
+
+        // Comprueba si el evento cubre completamente el slot
+        const eventCoversSlot =
+          eventStart <= slotStartISO &&
+          eventEnd >= slotEndISO;
+
+        // Un slot está ocupado solo en estos casos específicos
+        return eventStartsInSlot || eventEndsInSlot || eventCoversSlot;
+      });
       slots.push({
         time: format(currentTime, "HH:mm"),
         available: isAvailable,
