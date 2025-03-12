@@ -2,12 +2,20 @@ import { drizzle } from 'drizzle-orm/node-postgres';
 import { Pool } from 'pg';
 
 // Configuración del pool de conexiones
-const pool = new Pool({
+/* const pool = new Pool({
   host: 'localhost',
   port: 54322,
   user: 'postgres',
   password: 'postgres',
   database: 'postgres'
+}); */
+
+
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: {
+    rejectUnauthorized: false, // Necesario si tu Supabase requiere SSL
+  },
 });
 
 // Crear la instancia de drizzle

@@ -52,7 +52,7 @@ export const getBookingsByDate = async () : Promise <GroupedBookings> => {
       )) AS reservations
     FROM ${bookings}
     WHERE user_id = ${userId}
-   AND start_time >= (CURRENT_DATE + INTERVAL '8 hours')
+   AND start_time::timestamp >= (CURRENT_DATE + INTERVAL '8 hours')
     GROUP BY reservation_date
     ORDER BY reservation_date;
   `
