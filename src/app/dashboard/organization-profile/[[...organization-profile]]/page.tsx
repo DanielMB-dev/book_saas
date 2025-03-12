@@ -2,16 +2,11 @@ import { OrganizationProfile } from '@clerk/nextjs';
 
 
 
-const OrganizationProfilePage = (props: { params: { locale: string } }) => {
+const OrganizationProfilePage = () => {
 
 
   return (
     <>
-
-      {/*  <TitleBar
-        title={t('title_bar')}
-        description={t('title_bar_description')}
-      /> */}
 
       <OrganizationProfile
         routing="path"

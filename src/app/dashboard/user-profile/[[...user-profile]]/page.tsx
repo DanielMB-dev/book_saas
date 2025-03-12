@@ -2,14 +2,10 @@ import { UserProfile } from '@clerk/nextjs';
 
 
 
-const UserProfilePage = (props: { params: { locale: string } }) => {
+const UserProfilePage = () => {
 
   return (
     <>
-    {/*   <TitleBar
-        title={'title_bar'}
-        description={'title_bar_description'}
-      /> */}
 
       <UserProfile
         routing="path"
