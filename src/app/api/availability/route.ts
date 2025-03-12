@@ -94,35 +94,33 @@ export async function GET(request: Request) {
       const slotStart = currentTime
       const slotEnd = addMinutes(currentTime, 30)
 
-      // Check if this slot overlaps with any calendar events
+      // Crear fechas ISO completas para estos slots
+      const slotStartISO = new Date(
+        `${format(date, 'yyyy-MM-dd')}T${format(slotStart, 'HH:mm:ss')}-03:00`
+      );
+      const slotEndISO = new Date(
+        `${format(date, 'yyyy-MM-dd')}T${format(slotEnd, 'HH:mm:ss')}-03:00`
+      );
+
+      // Verificar disponibilidad
       const isAvailable = !events.some((event) => {
-       // console.log({ event })
-        const eventStart = event.start.dateTime
-        const eventEnd = event.end.dateTime
-     /*    const eventStartISO = parseISO(event.start.dateTime || event.start.date)
-        const eventEndISO = parseISO(event.end.dateTime || event.end.date) */
-        /* const eventStart = formatLocalDate(eventStartIso)
-        const eventEnd = formatLocalDate(eventEndIso) */
- /* 
-        const eventStart = convertToLocalTime(event.start.dateTime, event.start.timezone)
-        const eventEnd =  convertToLocalTime(event.end.dateTime, event.end.timezone) */
-        //console.log({ eventStart })
-        if (!isSameMonth(eventStart, monthDate)) return false
+        const eventStart = new Date(event.start.dateTime);
+        const eventEnd = new Date(event.end.dateTime);
 
         return (
-          isWithinInterval(slotStart, { start: eventStart, end: eventEnd }) ||
-          isWithinInterval(slotEnd, { start: eventStart, end: eventEnd }) ||
-          isWithinInterval(eventStart, { start: slotStart, end: slotEnd })
-        )
-      })
+          isWithinInterval(slotStartISO, { start: eventStart, end: eventEnd }) ||
+          isWithinInterval(slotEndISO, { start: eventStart, end: eventEnd }) ||
+          isWithinInterval(eventStart, { start: slotStartISO, end: slotEndISO })
+        );
+      });
 
+      // Agregar el slot con la hora explícitamente en formato de Chile
       slots.push({
-        time: formatInTimeZone(currentTime, 'America/Santiago', 'HH:mm'),
+        time: format(currentTime, "HH:mm"),
         available: isAvailable,
-      })
-      //console.log({ currentTime })
- 
-      currentTime = addMinutes(currentTime, 30)
+      });
+
+      currentTime = addMinutes(currentTime, 30);
     }
 
     return {
