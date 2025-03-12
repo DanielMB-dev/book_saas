@@ -1,8 +1,15 @@
 'use client'
+import { deleteBookingsDB } from '@/app/dashboard/_actions/delete-bookings';
 import { handleEdit } from '@/app/dashboard/_actions/get-events-google';
-import { getCalendarEvents } from '@/lib/google';
+import { deleteCalendarEvent } from '@/lib/google';
 import { BookingDataDB } from '@/types/booking'
+import { useRouter } from 'next/navigation';
 import { MdOutlineCalendarMonth, MdEditCalendar, MdDeleteOutline } from "react-icons/md";
+
+import Swal from 'sweetalert2'
+
+
+
 
 const formatTime = (dateString: Date) => {
     return new Date(dateString).toLocaleTimeString("es-CL", {
@@ -18,7 +25,39 @@ interface BookingProps {
     reservations: BookingDataDB[]
 
 }
+
+
 export const Booking = ({ reservations }: BookingProps) => {
+
+    console.log(reservations[0])
+
+    const router = useRouter()
+    
+    const handleDelete = async (googleEventId: string) => {
+        Swal.fire({
+            title: "Are you sure?",
+            text: "You won't be able to revert this!",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#3085d6",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "Yes, delete it!"
+        }).then(async (result) => {
+            if (result.isConfirmed) {
+                const res = await deleteBookingsDB(googleEventId)
+                const resGoogle = await deleteCalendarEvent(googleEventId)
+                if (res.success && resGoogle.success) {
+                    Swal.fire({
+                        title: "Deleted!",
+                        text: "Your appointment has been deleted.",
+                        icon: "success"
+                    });
+                }
+                router.refresh()
+            }
+        });
+
+    }
 
     return (
         <ol className="mt-3 divide-y divide-gray-200 dark:divide-gray-700">
@@ -34,7 +73,7 @@ export const Booking = ({ reservations }: BookingProps) => {
                         </div>
                     </div>
                     <div className='flex gap-3'>
-                        <MdDeleteOutline size={40} className='hover:cursor-pointer' />
+                        <MdDeleteOutline onClick={() => handleDelete(res.eventGoogleId!)} size={40} className='hover:cursor-pointer' />
                         <MdEditCalendar onClick={() => handleEdit(res.eventGoogleId!)} size={40} className='hover:cursor-pointer' />
 
                     </div>

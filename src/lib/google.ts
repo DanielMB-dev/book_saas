@@ -1,8 +1,10 @@
+'use server'
 import { calendarSelections } from "@/db/schema"
 import { db } from "@/db"
 import { eq } from "drizzle-orm"
 import { startOfMonth, endOfMonth } from "date-fns"
-import { clerkClient } from "@clerk/nextjs/server"
+import { auth, clerkClient } from "@clerk/nextjs/server"
+import { getCalendarId } from "@/app/[username]/book/_actions/calendar-selection"
 
 export async function getCalendarEvents(userId: string, year: number, month: number) {
   // Get user's selected calendars
@@ -117,6 +119,45 @@ export async function saveCalendarEvent(
   // Retornar la respuesta (datos del evento creado)
   const data = await response.json();
   return data;
+}
+
+export async function deleteCalendarEvent(googleEventId: string) {
+  const { sessionClaims } = await auth()
+  const userId = sessionClaims?.sub
+
+  if (!userId) {
+    throw new Error("Not authenticated")
+  }
+
+
+  const client = await clerkClient();
+  const tokenResponse = await client.users.getUserOauthAccessToken(userId, "oauth_google");
+  const accessToken = tokenResponse.data[0]!.token;
+
+  const calendar = await getCalendarId(userId)
+  const calendarId = calendar[0].calendarId
+
+  try {
+    await fetch(
+      `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calendarId)}/events/${encodeURIComponent(googleEventId)}`,
+      {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      }
+    );
+    return {
+      success: true,
+      data: null
+
+    }
+  } catch (error) {
+    return {
+      success: false,
+      data: null
+    }
+  }
 }
 
 
