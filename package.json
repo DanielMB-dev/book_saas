@@ -48,6 +48,7 @@
     "cmdk": "1.0.0",
     "convex": "^1.17.0",
     "date-fns": "^4.1.0",
+    "date-fns-tz": "^3.2.0",
     "dotenv": "^16.4.7",
     "drizzle-orm": "^0.40.0",
     "embla-carousel-react": "^8.4.0",

@@ -17,6 +17,7 @@ import {
 } from "date-fns"
 import { getCalendarEvents } from "@/lib/google"
 import { convertToLocalTime } from "@/helpers/formatDateToLocal"
+import { formatInTimeZone, toZonedTime } from 'date-fns-tz'
 
 
 export async function GET(request: Request) {
@@ -105,7 +106,7 @@ export async function GET(request: Request) {
  /* 
         const eventStart = convertToLocalTime(event.start.dateTime, event.start.timezone)
         const eventEnd =  convertToLocalTime(event.end.dateTime, event.end.timezone) */
-        console.log({ eventStart })
+        //console.log({ eventStart })
         if (!isSameMonth(eventStart, monthDate)) return false
 
         return (
@@ -116,10 +117,11 @@ export async function GET(request: Request) {
       })
 
       slots.push({
-        time: format(currentTime, "HH:mm"),
+        time: formatInTimeZone(currentTime, 'America/Santiago', 'HH:mm'),
         available: isAvailable,
       })
-
+      //console.log({ currentTime })
+ 
       currentTime = addMinutes(currentTime, 30)
     }
 
