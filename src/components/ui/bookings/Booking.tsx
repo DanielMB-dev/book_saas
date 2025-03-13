@@ -28,9 +28,6 @@ interface BookingProps {
 
 
 export const Booking = ({ reservations }: BookingProps) => {
-
-    console.log(reservations[0])
-
     const router = useRouter()
     
     const handleDelete = async (googleEventId: string) => {

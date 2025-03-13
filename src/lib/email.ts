@@ -29,7 +29,6 @@ export async function sendEmailMessage(emailData: BookingDataDB, eventContent: s
       `,
       attachment: [attachment]
     });
-    console.log("Email sent", data)
   } catch (error) {
     console.log(error); //logs any error
   }

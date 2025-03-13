@@ -39,6 +39,7 @@ export default function CalendarDayPicker({ username }: CalendarDayPickerProps) 
         username,
         year: year.toString(),
         month: monthNum.toString(),
+        timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone
       })
       
       const response = await fetch(`/api/availability?${searchParams.toString()}`)
@@ -85,7 +86,6 @@ export default function CalendarDayPicker({ username }: CalendarDayPickerProps) 
   }
 
   // Find the availability for the selected date
-console.log({date})
   const selectedDateAvailability = date
     ? monthAvailability.find(day => day.date === format(date, "yyyy-MM-dd"))
     : undefined

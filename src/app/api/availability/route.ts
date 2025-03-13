@@ -1,30 +1,26 @@
 import { NextResponse } from "next/server"
 import { db } from "@/db"
 import { availability } from "@/db/schema"
-import { eq, and } from "drizzle-orm"
+import { eq } from "drizzle-orm"
 import { getUserIdFromUsername } from "@/lib/auth"
-import { 
-  addDays,
-  addMinutes, 
-  format, 
+import {
+  addMinutes,
+  format,
   parse,
-  parseISO, 
-  isWithinInterval,
   startOfMonth,
   endOfMonth,
   eachDayOfInterval,
-  isSameMonth
 } from "date-fns"
-import { getCalendarEvents } from "@/lib/google"
-import { convertToLocalTime } from "@/helpers/formatDateToLocal"
-import { formatInTimeZone, toZonedTime } from 'date-fns-tz'
+import { toZonedTime, fromZonedTime } from "date-fns-tz";
 
+import { getCalendarEvents } from "@/lib/google"
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
   const username = searchParams.get("username")
   const year = searchParams.get("year")
   const month = searchParams.get("month") // 1-12
+  const timeZone = searchParams.get("timeZone") || "UTC" // Default UTC si no se envía
 
   if (!username || !year || !month) {
     return NextResponse.json(
@@ -41,7 +37,7 @@ export async function GET(request: Request) {
     )
   }
 
-  // Get all availability records for this user
+  // Obtener disponibilidad
   const availabilityRecords = await db
     .select()
     .from(availability)
@@ -55,7 +51,7 @@ export async function GET(request: Request) {
     })
   }
 
-  // Create availability lookup by day of week
+  // Mapear disponibilidad por día de la semana
   const availabilityByDay = availabilityRecords.reduce((acc, record) => {
     acc[record.dayOfWeek] = {
       startTime: record.startTime,
@@ -64,15 +60,15 @@ export async function GET(request: Request) {
     return acc
   }, {} as Record<string, { startTime: string; endTime: string }>)
 
-  // Get start and end of month
+  // Definir el rango del mes
   const monthDate = new Date(parseInt(year), parseInt(month) - 1)
   const monthStart = startOfMonth(monthDate)
   const monthEnd = endOfMonth(monthDate)
 
-  // Get all events for the month
+  // Obtener eventos de Google Calendar
   const events = await getCalendarEvents(userId, parseInt(year), parseInt(month))
 
-  // Get all days in the month
+  // Generar los días con disponibilidad
   const days = eachDayOfInterval({ start: monthStart, end: monthEnd }).map(date => {
     const dayOfWeek = format(date, "EEEE")
     const dayAvailability = availabilityByDay[dayOfWeek]
@@ -85,69 +81,36 @@ export async function GET(request: Request) {
       }
     }
 
-    // Generate time slots for this day
+    // Generar slots en la zona horaria del usuario
     const slots = []
     let currentTime = parse(dayAvailability.startTime, "HH:mm", date)
     const endTimeDate = parse(dayAvailability.endTime, "HH:mm", date)
 
     while (currentTime <= endTimeDate) {
-      const slotStart = currentTime
-      const slotEnd = addMinutes(currentTime, 30)
+      const slotStartLocal = toZonedTime(currentTime, timeZone)
+      const slotEndLocal = toZonedTime(addMinutes(currentTime, 30), timeZone)
 
-      // Crear fechas ISO completas para estos slots
-      const slotStartISO = new Date(
-        `${format(date, 'yyyy-MM-dd')}T${format(slotStart, 'HH:mm:ss')}-03:00`
-      );
-      const slotEndISO = new Date(
-        `${format(date, 'yyyy-MM-dd')}T${format(slotEnd, 'HH:mm:ss')}-03:00`
-      );
+      // Convertir a UTC para comparar con eventos de Google Calendar
+      const slotStartUTC = fromZonedTime(slotStartLocal, timeZone)
+      const slotEndUTC = fromZonedTime(slotEndLocal, timeZone)
 
-      // Verificar disponibilidad
-     /*  const isAvailable = !events.some((event) => {
-        const eventStart = new Date(event.start.dateTime);
-        const eventEnd = new Date(event.end.dateTime);
+      const isAvailable = !events.some(event => {
+        const eventStart = new Date(event.start.dateTime)
+        const eventEnd = new Date(event.end.dateTime)
 
         return (
-          isWithinInterval(slotStartISO, { start: eventStart, end: eventEnd }) ||
-          isWithinInterval(slotEndISO, { start: eventStart, end: eventEnd }) ||
-          isWithinInterval(eventStart, { start: slotStartISO, end: slotEndISO })
-        );
-      });
- */
-      // Agregar el slot con la hora explícitamente en formato de Chile
+          (eventStart >= slotStartUTC && eventStart < slotEndUTC) ||
+          (eventEnd > slotStartUTC && eventEnd <= slotEndUTC) ||
+          (eventStart <= slotStartUTC && eventEnd >= slotEndUTC)
+        )
+      })
 
-      // Verificar disponibilidad con lógica más precisa
-      const isAvailable = !events.some((event) => {
-        const eventStart = new Date(event.start.dateTime);
-        const eventEnd = new Date(event.end.dateTime);
-
-        // Un slot está ocupado solo si el evento cubre completamente el slot o
-        // si el evento comienza exactamente al inicio del slot
-
-        // Comprueba si el evento comienza exactamente en este slot
-        const eventStartsInSlot =
-          eventStart >= slotStartISO &&
-          eventStart < slotEndISO;
-
-        // Comprueba si el evento termina dentro de este slot
-        const eventEndsInSlot =
-          eventEnd > slotStartISO &&
-          eventEnd <= slotEndISO;
-
-        // Comprueba si el evento cubre completamente el slot
-        const eventCoversSlot =
-          eventStart <= slotStartISO &&
-          eventEnd >= slotEndISO;
-
-        // Un slot está ocupado solo en estos casos específicos
-        return eventStartsInSlot || eventEndsInSlot || eventCoversSlot;
-      });
       slots.push({
-        time: format(currentTime, "HH:mm"),
+        time: format(slotStartLocal, "HH:mm"), // Mostrar en hora local
         available: isAvailable,
-      });
+      })
 
-      currentTime = addMinutes(currentTime, 30);
+      currentTime = addMinutes(currentTime, 30)
     }
 
     return {
