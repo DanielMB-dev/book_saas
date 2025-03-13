@@ -39,20 +39,23 @@ export const getBookingsByDate = async () : Promise <GroupedBookings> => {
         sql`
     SELECT 
       DATE(start_time) AS reservation_date, 
-      json_agg(json_build_object(
-        'id', id,
-        'guestName', guest_name,
-        'guestEmail', guest_email,
-        'notes', notes,
-        'startTime', start_time,
-        'endTime', end_time,
-        'createdAt', created_at,
-        'userId', user_id,
-        'eventGoogleId', event_google_id
-      )) AS reservations
+      json_agg(
+        json_build_object(
+          'id', id,
+          'guestName', guest_name,
+          'guestEmail', guest_email,
+          'notes', notes,
+          'startTime', start_time,
+          'endTime', end_time,
+          'createdAt', created_at,
+          'userId', user_id,
+          'eventGoogleId', event_google_id
+        )
+        ORDER BY start_time -- Ordena dentro del JSON
+      ) AS reservations
     FROM ${bookings}
     WHERE user_id = ${userId}
-   AND start_time::timestamp >= (CURRENT_DATE + INTERVAL '8 hours')
+      AND start_time::timestamp >= NOW()
     GROUP BY reservation_date
     ORDER BY reservation_date;
   `
